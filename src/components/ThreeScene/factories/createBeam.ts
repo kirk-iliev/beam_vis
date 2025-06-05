@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import { BeamConfig } from '../../../types/ComponentConfig';
+import type { SharedResources } from '../ThreeScene';
 
 /**
  * Creates a beam group.
  * - If "cylinder" is enabled, creates the cylinder beam.
  * - Photon stream logic is handled globally in ThreeScene.
  */
-export function createBeam(cfg: BeamConfig): THREE.Object3D {
+export function createBeam(cfg: BeamConfig, shared: SharedResources): THREE.Object3D {
   const group = new THREE.Group();
   group.name = 'beamGroup';
 
@@ -17,15 +18,10 @@ export function createBeam(cfg: BeamConfig): THREE.Object3D {
     const geom = new THREE.CylinderGeometry(radius, radius, height, 16);
     geom.rotateZ(Math.PI / 2);
 
-    const mat = new THREE.MeshStandardMaterial({
-      color: '#BF83FC', // pink
-      transparent: true,
-      opacity: 0.6,
-      emissive: '#BF83FC',
-      emissiveIntensity: cfg.beamPower ? cfg.beamPower / 20 : 1,
-    });
+    const beamMat = shared.materials.beam;
+    beamMat.emissiveIntensity = cfg.beamPower ? cfg.beamPower / 20 : 1;
 
-    const beamMesh = new THREE.Mesh(geom, mat);
+    const beamMesh = new THREE.Mesh(geom, beamMat);
     beamMesh.castShadow = false;
     beamMesh.receiveShadow = false;
     beamMesh.name = 'beam-cylinder';

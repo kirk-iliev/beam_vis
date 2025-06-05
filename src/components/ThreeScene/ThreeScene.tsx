@@ -10,6 +10,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import { createObjectFromConfig } from './factories';
 import { ComponentConfig } from '../../types/ComponentConfig';
+import { beamColorMap } from '../../types/ComponentConfig';
 
 /** Types for photon streaming */
 interface Photon {
@@ -24,6 +25,19 @@ interface ThreeSceneProps {
   // cameraX: number;
 }
 
+export interface SharedResources {
+  xRayMaterial: THREE.ShaderMaterial;
+  materials: {
+    detector: THREE.MeshPhongMaterial;
+    beam: THREE.MeshStandardMaterial;
+    sampleCube: THREE.MeshPhongMaterial;
+    // Additional materials can be added here.
+  };
+  geometries?: {
+    // Shared geometries if needed.
+  };
+}
+
 const ThreeScene: React.FC<ThreeSceneProps> = ({ sceneConfig /*, cameraX */ }) => {
   /********************************************************
    * Refs for Scene, Cameras, Renderer, etc.
@@ -36,7 +50,6 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ sceneConfig /*, cameraX */ }) =
   const composerRef = useRef<EffectComposer | null>(null);
   const xRayRenderTargetRef = useRef<THREE.WebGLRenderTarget | null>(null);
   const objectMapRef = useRef<Record<string, THREE.Object3D>>({});
-  const beamReady = useRef(false);
 
   /********************************************************
    * Photon-related Refs
@@ -55,6 +68,8 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ sceneConfig /*, cameraX */ }) =
   /********************************************************
    * Shared / Memoized Resources for Factories
    ********************************************************/
+
+
   const sharedResources = useMemo(() => {
     const xRayMaterial = new THREE.ShaderMaterial({
       uniforms: {
@@ -264,6 +279,15 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ sceneConfig /*, cameraX */ }) =
       const beamObj = beamCfg ? objectMapRef.current[beamCfg.id] as THREE.Group : undefined;
       const beamCyl = beamObj?.getObjectByName('beam-cylinder') as THREE.Mesh;
       const detectorObj = scene.getObjectByName('detector');
+      const beamMaterial = sharedResources.materials.beam;
+
+      if (beamCfg?.beamMono) {
+        const targetColor = beamColorMap[beamCfg.beamMono];
+        if (beamMaterial.color.getStyle() !== targetColor) {
+          beamMaterial.color.set(targetColor);
+          beamMaterial.needsUpdate = true;
+        }
+      }
 
       let stopX = -2;
       let detectorX = 4;
