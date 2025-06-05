@@ -36,6 +36,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ sceneConfig /*, cameraX */ }) =
   const composerRef = useRef<EffectComposer | null>(null);
   const xRayRenderTargetRef = useRef<THREE.WebGLRenderTarget | null>(null);
   const objectMapRef = useRef<Record<string, THREE.Object3D>>({});
+  const beamReady = useRef(false);
 
   /********************************************************
    * Photon-related Refs
@@ -255,11 +256,37 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ sceneConfig /*, cameraX */ }) =
       // Use latest sceneConfig from the ref
       const currentConfig = sceneConfigRef.current;
       const beamCfg = currentConfig.find((c) => c.type === 'beam');
-      
+
       // 5) Update Beam Stop (shutter) pivot and color
       const stopCfg = currentConfig.find((c) => c.type === 'beamStop');
       const isOpen = stopCfg?.shutterOpen || false;
-      const beamStopPivot = scene.getObjectByName('beamStop-pivot');
+      const beamStopPivot = stopCfg ? objectMapRef.current[stopCfg.id] : undefined;
+      const beamObj = beamCfg ? objectMapRef.current[beamCfg.id] as THREE.Group : undefined;
+      const beamCyl = beamObj?.getObjectByName('beam-cylinder') as THREE.Mesh;
+      const detectorObj = scene.getObjectByName('detector');
+
+      let stopX = -2;
+      let detectorX = 4;
+      const beamStartX = -6;
+
+      if (detectorObj && beamStopPivot) {
+        const vec1 = new THREE.Vector3();
+        const vec2 = new THREE.Vector3();
+        detectorObj.getWorldPosition(vec1);
+        beamStopPivot.getWorldPosition(vec2);
+        detectorX = vec1.x;
+        stopX = vec2.x;
+      }
+      else if (!detectorObj) {console.warn('Detector object not found in scene.');}
+      else if (!beamStopPivot) {console.warn('Beam Stop pivot not found in scene.');}
+
+      if (beamCyl) {
+        const targetX = isOpen ? detectorX : stopX;
+        const beamLength = targetX - beamStartX;
+        beamCyl.scale.x = beamLength / 8;
+        beamCyl.position.x = beamStartX + beamLength / 2;
+      }
+
       if (beamStopPivot) {
         // Smoothly animate pivot rotation (optional)
         beamStopPivot.rotation.y = isOpen ? -Math.PI / 2 : 0;
@@ -272,7 +299,7 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ sceneConfig /*, cameraX */ }) =
       }
     }
       const { xRayMaterial } = sharedResources;
-      xRayMaterial.uniforms.shutterOpen.value = isOpen ? 1.0 : 0.0;  
+      xRayMaterial.uniforms.shutterOpen.value = isOpen ? 1.0 : 0.0;
 
       // 1) Offscreen render for xRay
       renderer.setRenderTarget(xRayRenderTarget);
@@ -341,7 +368,8 @@ const ThreeScene: React.FC<ThreeSceneProps> = ({ sceneConfig /*, cameraX */ }) =
       xRayRenderTarget.dispose();
       scene.clear();
     };
-  }, []); // initialization runs only once
+  }, []
+); // initialization runs only once
 
   /********************************************************
    * 2) Rebuild Scene Objects on sceneConfig Changes
