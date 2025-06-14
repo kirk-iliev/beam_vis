@@ -33,9 +33,7 @@ export interface SharedResources {
     sampleCube: THREE.MeshPhongMaterial;
     // Additional materials can be added here.
   };
-  geometries?: {
-    // Shared geometries if needed.
-  };
+  geometries?: object;
 }
 
 const ThreeScene: React.FC<ThreeSceneProps> = ({ sceneConfig /*, cameraX */ }) => {
