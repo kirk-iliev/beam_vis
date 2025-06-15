@@ -40,7 +40,7 @@ export const EpicsProvider = ({ children }: { children: ReactNode }) => {
 
     socket.current.onmessage = ({ data }) => {
       console.log('[EPICS] recv', data);
-      let msg: unknown;
+      let msg: any;
       try {
         msg = JSON.parse(data);
       } catch {
