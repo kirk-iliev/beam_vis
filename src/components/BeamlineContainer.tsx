@@ -68,6 +68,7 @@ const BeamlineContainer: FC = () => {
   }, [horizX, horizY, horizZ]);
 
   useEffect(() => {
+    setPlayAngle(rotationStage);
     setConfigs(prev =>
       prev.map(cfg =>
         cfg.id === 'rotationStage'
@@ -91,50 +92,54 @@ const BeamlineContainer: FC = () => {
   // Control panel toggles
   const togglePanel = () => setPanelOpen(p => !p);
   const handlePlayPause = () => setIsPlaying(p => !p);
-  const handleManualAngleChange = (val: number) => {
-    setPlayAngle(val);
-    setConfigs(prev =>
-      prev.map(cfg =>
-        cfg.id === 'rotationStage'
-          ? { ...cfg, transform: { ...cfg.transform, rotation: [0, (Math.PI * val) / 180, 0] } }
-          : cfg
-      )
-    );
-  };
+  // const handleManualAngleChange = (val: number) => {
+  //   setPlayAngle(val);
+  //   setConfigs(prev =>
+  //     prev.map(cfg =>
+  //       cfg.id === 'rotationStage'
+  //         ? { ...cfg, transform: { ...cfg.transform, rotation: [0, (Math.PI * val) / 180, 0] } }
+  //         : cfg
+  //     )
+  //   );
+  // };
 
   // Publish PV writes
   const handleCenteringStageXChange = (val: number) => publish('IOC:m1.VAL', val);
   const handleCenteringStageYChange = (val: number) => publish('IOC:m2.VAL', val);
   const handleCenteringStageZChange = (val: number) => publish('IOC:m3.VAL', val);
+  const handleStageXChange = (val: number) => publish('IOC:m4.VAL', val);
+  const handleStageYChange = (val: number) => publish('IOC:m5.VAL', val);
+  const handleStageZChange = (val: number) => publish('IOC:m6.VAL', val);
+  const handleManualAngleChange = (val: number) => publish('IOC:m7.VAL', val);
 
   // Horizontal stage (local only)
-  const handleStageXChange = (val: number) => {
-    setConfigs(prev =>
-      prev.map(cfg =>
-        cfg.id === 'horizontalStage'
-          ? { ...cfg, transform: { ...cfg.transform, position: [val, cfg.transform.position[1], cfg.transform.position[2]] } }
-          : cfg
-      )
-    );
-  };
-  const handleStageYChange = (val: number) => {
-    setConfigs(prev =>
-      prev.map(cfg =>
-        cfg.id === 'horizontalStage'
-          ? { ...cfg, transform: { ...cfg.transform, position: [cfg.transform.position[0], val, cfg.transform.position[2]] } }
-          : cfg
-      )
-    );
-  };
-  const handleStageZChange = (val: number) => {
-    setConfigs(prev =>
-      prev.map(cfg =>
-        cfg.id === 'horizontalStage'
-          ? { ...cfg, transform: { ...cfg.transform, position: [cfg.transform.position[0], cfg.transform.position[1], val] } }
-          : cfg
-      )
-    );
-  };
+  // const handleStageXChange = (val: number) => {
+  //   setConfigs(prev =>
+  //     prev.map(cfg =>
+  //       cfg.id === 'horizontalStage'
+  //         ? { ...cfg, transform: { ...cfg.transform, position: [val, cfg.transform.position[1], cfg.transform.position[2]] } }
+  //         : cfg
+  //     )
+  //   );
+  // };
+  // const handleStageYChange = (val: number) => {
+  //   setConfigs(prev =>
+  //     prev.map(cfg =>
+  //       cfg.id === 'horizontalStage'
+  //         ? { ...cfg, transform: { ...cfg.transform, position: [cfg.transform.position[0], val, cfg.transform.position[2]] } }
+  //         : cfg
+  //     )
+  //   );
+  // };
+  // const handleStageZChange = (val: number) => {
+  //   setConfigs(prev =>
+  //     prev.map(cfg =>
+  //       cfg.id === 'horizontalStage'
+  //         ? { ...cfg, transform: { ...cfg.transform, position: [cfg.transform.position[0], cfg.transform.position[1], val] } }
+  //         : cfg
+  //     )
+  //   );
+  // };
 
   // Visibility toggle
   const handleToggleVisibility = (id: string) => setConfigs(prev => prev.map(cfg => (cfg.id === id ? { ...cfg, visible: !cfg.visible } : cfg)));
@@ -165,7 +170,7 @@ const BeamlineContainer: FC = () => {
           isPlaying={isPlaying}
           handlePlayPause={handlePlayPause}
           playAngle={playAngle}
-          handleManualAngleChange={handleManualAngleChange}
+          handleManualAngleChange={handleManualAngleChange} // Remove this line
           cameraX={cameraX}
           setCameraX={setCameraX}
           motorX={motorX}

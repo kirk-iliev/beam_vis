@@ -46,7 +46,7 @@ const ControlModules: React.FC<ControlModulesProps> = ({
   handleStageYChange,
   handleStageZChange,
   handleCenteringStageXChange,
-  // handleCenteringStageYChange,
+  // handleCenteringStageYChange
   handleCenteringStageZChange,
   cameraX,
   setCameraX,
