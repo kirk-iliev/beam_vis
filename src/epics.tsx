@@ -30,7 +30,6 @@ export const EpicsProvider = ({ children }: { children: ReactNode }) => {
 
     socket.current.onopen = () => {
       console.log('[EPICS] socket open');
-      // Send any pending subscriptions
       subscribedPVs.current.forEach(pv => {
         const msg = { type: 'subscribe', pvs: [pv] };
         console.log('[EPICS] subscribe (onopen)→', msg);
@@ -40,6 +39,7 @@ export const EpicsProvider = ({ children }: { children: ReactNode }) => {
 
     socket.current.onmessage = ({ data }) => {
       console.log('[EPICS] recv', data);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let msg: any;
       try {
         msg = JSON.parse(data);
@@ -67,7 +67,7 @@ export const EpicsProvider = ({ children }: { children: ReactNode }) => {
   const subscribe = useCallback((pv: string, cb: (v: number) => void) => {
     callbacks.current[pv] = cb;
     subscribedPVs.current.add(pv);
-    // If already open, send immediately
+
     if (socket.current?.readyState === WebSocket.OPEN) {
       const msg = { type: 'subscribe', pvs: [pv] };
       console.log('[EPICS] subscribe→', msg);

@@ -29,6 +29,11 @@ const BeamlineContainer: FC = () => {
   const motorX = useEpics('IOC:m1.VAL');
   const motorY = useEpics('IOC:m2.VAL');
   const motorZ = useEpics('IOC:m3.VAL');
+  const horizX = useEpics('IOC:m4.VAL');
+  const horizY = useEpics('IOC:m5.VAL');
+  const horizZ = useEpics('IOC:m6.VAL');
+  const rotationStage = useEpics('IOC:m7.VAL');
+
   const { publish } = useContext(EpicsContext);
 
   // Load beamline definition on selection
@@ -51,6 +56,26 @@ const BeamlineContainer: FC = () => {
       )
     );
   }, [motorX, motorY, motorZ]);
+
+  useEffect(() => {
+    setConfigs(prev =>
+      prev.map(cfg =>
+        cfg.id === 'horizontalStage'
+          ? { ...cfg, transform: { ...cfg.transform, position: [horizX, horizY, horizZ] } }
+          : cfg
+      )
+    );
+  }, [horizX, horizY, horizZ]);
+
+  useEffect(() => {
+    setConfigs(prev =>
+      prev.map(cfg =>
+        cfg.id === 'rotationStage'
+          ? { ...cfg, transform: { ...cfg.transform, rotation: [0, (Math.PI * rotationStage) / 180, 0] } }
+          : cfg
+      )
+    );
+  }, [rotationStage]);
 
   // Sample mesh handler
   const handleSampleMeshChange = (meshType: 'cube' | 'cylinder' | 'fbx' | 'obj') => {
