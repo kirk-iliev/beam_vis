@@ -8,7 +8,7 @@ import ThreeScene from './ThreeScene/ThreeScene';
 import ControlPanel from './ControlPanel/ControlPanel';
 import { ComponentConfig } from '../types/ComponentConfig';
 import { beamlineDefinitions, BeamlineDefinition } from '../beam_configs';
-import { useEpics, EpicsContext } from '../epics';
+import { usePV, useEpics } from '../EPICS/EpicsContext';
 
 const BeamlineContainer: FC = () => {
   // Available beamlines
@@ -26,15 +26,15 @@ const BeamlineContainer: FC = () => {
   const [cameraX, setCameraX] = useState(-10);
 
   // EPICS PV subscriptions (use full .VAL field names)
-  const motorX = useEpics('IOC:m1.VAL');
-  const motorY = useEpics('IOC:m2.VAL');
-  const motorZ = useEpics('IOC:m3.VAL');
-  const horizX = useEpics('IOC:m4.VAL');
-  const horizY = useEpics('IOC:m5.VAL');
-  const horizZ = useEpics('IOC:m6.VAL');
-  const rotationStage = useEpics('IOC:m7.VAL');
+  const motorX = usePV('IOC:m1.VAL');
+  const motorY = usePV('IOC:m2.VAL');
+  const motorZ = usePV('IOC:m3.VAL');
+  const horizX = usePV('IOC:m4.VAL');
+  const horizY = usePV('IOC:m5.VAL');
+  const horizZ = usePV('IOC:m6.VAL');
+  const rotationStage = usePV('IOC:m7.VAL');
 
-  const { publish } = useContext(EpicsContext);
+  const { publish } = useEpics();
 
   // Load beamline definition on selection
   useEffect(() => {

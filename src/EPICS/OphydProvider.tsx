@@ -33,13 +33,13 @@ export const OphydProvider = ({ children }: { children: ReactNode}) => {
       } catch {
         return;
       }
-      if (msg.action === 'update' &&
+      if (
         typeof msg.pv === 'string' &&
         typeof msg.value === 'number' &&
         callbacks.current[msg.pv]) {
-        callbacks.current[msg.pv](msg.value);
-      }
-    }
+          callbacks.current[msg.pv](msg.value);
+        }
+    };
 
     socket.current.onerror = err => console.error('[EPICS][Ophyd] error', err);
     return () => {
@@ -60,7 +60,7 @@ export const OphydProvider = ({ children }: { children: ReactNode}) => {
   }, []);
 
   const publish = useCallback<EpicsApi['publish']>((pv, value) => {
-    const msg = { action: 'set', pv, value, timeout: 1 };
+    const msg = { action: 'set', pv, value, timeout: 10 };
     console.log('[EPICS][Ophyd] publish→', msg);
     sendMsg(msg);
   }, []);
